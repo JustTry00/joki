@@ -1,0 +1,133 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("user") // user, admin
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+  tokens        Token[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Tier {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  price       Int // dalam rupiah
+  requests    Int // jumlah request yang bisa dilakukan
+  duration    Int // durasi dalam hari (0 = unlimited)
+  features    String[] // array fitur tambahan
+  popular     Boolean  @default(false)
+  active      Boolean  @default(true)
+  orders      Order[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Order {
+  id              String       @id @default(cuid())
+  userId          String
+  tierId          String
+  status          OrderStatus  @default(PENDING)
+  paymentProof    String? // URL bukti pembayaran
+  whatsappNumber  String
+  totalPrice      Int
+  confirmedBy     String? // admin user id yang konfirmasi
+  confirmedAt     DateTime?
+  rejectedReason  String?
+  token           Token?
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier            Tier         @relation(fields: [tierId], references: [id])
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+  EXPIRED
+}
+
+model Token {
+  id              String   @id @default(cuid())
+  userId          String
+  orderId         String   @unique
+  token           String   @unique
+  requests        Int // jumlah request tersisa
+  maxRequests     Int // total request yang bisa dilakukan
+  expiresAt       DateTime? // null = tidak pernah expired
+  active          Boolean  @default(true)
+  lastUsedAt      DateTime?
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  usage           TokenUsage[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([token])
+  @@index([userId])
+}
+
+model TokenUsage {
+  id        String   @id @default(cuid())
+  tokenId   String
+  ipAddress String?
+  userAgent String?
+  token     Token    @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([tokenId])
+  @@index([createdAt])
+}
