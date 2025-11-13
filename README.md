@@ -317,4 +317,4 @@ MIT License - feel free to use for your projects!
 Built with Next.js, Prisma, NextAuth, Tailwind CSS, and shadcn/ui.
 \`\`\`
 
-```md file="" isHidden
+\`\`\`md file="" isHidden
