@@ -4,7 +4,7 @@ interface SendTokenEmailParams {
   token: string
   tierName: string
   requests: number
-  expiresAt: Date
+  expiresAt: Date | undefined
 }
 
 const EMAIL_CONFIG = {
@@ -69,7 +69,7 @@ export async function testEmailConnection() {
 
   try {
     const nodemailer = await import("nodemailer")
-    const transporter = nodemailer.createTransporter(EMAIL_CONFIG)
+    const transporter = nodemailer.createTransport(EMAIL_CONFIG)
     await transporter.verify()
     console.log("✅ Email server connection successful!")
     return {
@@ -129,7 +129,7 @@ function generateEmailHTML({ userName, token, tierName, requests, expiresAt }: O
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #666;">Expires:</td>
-          <td style="padding: 8px 0; font-weight: bold;">${new Date(expiresAt).toLocaleDateString("id-ID", {
+          <td style="padding: 8px 0; font-weight: bold;">${new Date(expiresAt ?? "undefined").toLocaleDateString("id-ID", {
             day: "numeric",
             month: "long",
             year: "numeric",

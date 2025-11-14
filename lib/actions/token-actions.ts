@@ -60,7 +60,7 @@ export async function createTokenForOrder(orderId: string) {
     token: tokenString,
     tierName: order.tier.name,
     requests: order.tier.requests,
-    expiresAt,
+    expiresAt: expiresAt ?? undefined,
   })
 
   return token
