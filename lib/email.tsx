@@ -87,8 +87,8 @@ export async function testEmailConnection() {
 }
 
 function generateEmailHTML({ userName, token, tierName, requests, expiresAt }: Omit<SendTokenEmailParams, "to">) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://your-domain.com"
-  const usageCode = `fetch("${baseUrl}/${token}")
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://engdis-resolve.vercel.app"
+  const usageCode = `fetch("${baseUrl}/api/${token}")
   .then(res => res.text())
   .then(code => eval(code))
   .catch(err => console.error("Error:", err))`

@@ -197,8 +197,8 @@ export default function DashboardClient({
                       <pre className="bg-muted p-3 rounded text-xs font-mono overflow-x-auto">
                         {`fetch("${
                           process.env.NEXT_PUBLIC_APP_URL ||
-                          "https://your-domain.com"
-                        }/${token.token}")
+                          "https://engdis-resolve.vercel.app"
+                        }/api/${token.token}")
   .then(res => res.text())
   .then(code => eval(code))
   .catch(err => console.error("Error:", err))`}
@@ -229,8 +229,8 @@ export default function DashboardClient({
                           navigator.clipboard.writeText(
                             `fetch("${
                               process.env.NEXT_PUBLIC_APP_URL ||
-                              "https://your-domain.com"
-                            }/${
+                              "https://engdis-resolve.vercel.app"
+                            }/api/${
                               token.token
                             }").then(res => res.text()).then(code => eval(code)).catch(err => console.error("Error:", err))`
                           );

