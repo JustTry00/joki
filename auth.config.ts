@@ -1,11 +1,11 @@
 import type { NextAuthConfig } from "next-auth"
 import Google from "next-auth/providers/google"
 
-const config: NextAuthConfig = {
+export default {
   providers: [
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     }),
   ],
   pages: {
@@ -24,21 +24,19 @@ const config: NextAuthConfig = {
 
       return true
     },
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id
-        token.role = user.role || "user"
+        token.role = (user as any).role || "user"
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string
-        session.user.role = token.role as string
+        (session.user as any).id = token.id as string;
+        (session.user as any).role = token.role as string
       }
       return session
     },
   },
-}
-
-export default config
+} satisfies NextAuthConfig
