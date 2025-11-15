@@ -140,7 +140,7 @@ export default function DashboardClient({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {orders.filter((o) => o.status === "CONFIRMED").length}
+                {orders.filter((o) => o.status === "CONFIRMED").length} 
               </div>
             </CardContent>
           </Card>
