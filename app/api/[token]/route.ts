@@ -1,3 +1,7 @@
+// 🚫 Jangan cache sama sekali — WAJIB
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { type NextRequest, NextResponse } from "next/server";
 import { validateAndUseToken } from "@/lib/actions/token-actions";
 
@@ -11,7 +15,7 @@ export async function GET(
   try {
     const { token } = params;
 
-    // FIX: Get IP properly in App Router
+    // Ambil IP
     const forwardedFor = request.headers.get("x-forwarded-for");
     const realIp = request.headers.get("x-real-ip");
     const ipAddress =
@@ -19,19 +23,30 @@ export async function GET(
 
     const userAgent = request.headers.get("user-agent") || "unknown";
 
-    // Validate token and track usage
+    // Validasi token
     const validation = await validateAndUseToken(token, ipAddress, userAgent);
 
     if (!validation.valid) {
-      return NextResponse.json({ error: validation.error }, { status: 401 });
+      return new NextResponse(
+        JSON.stringify({ error: validation.error }),
+        {
+          status: 401,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Cache-Control": "no-store",
+          },
+        }
+      );
     }
 
-    // Return script code
+    // JS yang dikirim ke client
     const fetchCode = `
 console.log("[TokenGen] Loading ED.ENGDIS Auto-Answer...");
 console.log("[TokenGen] Remaining requests: ${validation.remainingRequests}");
 
-fetch("${GITHUB_SCRIPT_URL}")
+// Tambahkan cache buster supaya TIDAK di-cache browser
+fetch("${GITHUB_SCRIPT_URL}?_v=" + Date.now())
   .then(res => {
     if (!res.ok) throw new Error("Failed to load script");
     return res.text();
@@ -51,20 +66,30 @@ fetch("${GITHUB_SCRIPT_URL}")
       headers: {
         "Content-Type": "application/javascript",
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
         "Access-Control-Allow-Headers": "*",
-        "X-Remaining-Requests": validation.remainingRequests?.toString() || "0",
+        "X-Remaining-Requests": String(validation.remainingRequests ?? 0),
+        "Cache-Control": "no-store", // 🚫 jangan cache sama sekali
       },
     });
   } catch (error) {
     console.error("Token API error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+
+    return new NextResponse(
+      JSON.stringify({ error: "Internal server error" }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Cache-Control": "no-store",
+        },
+      }
     );
   }
 }
 
+// CORS preflight
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
@@ -72,6 +97,7 @@ export async function OPTIONS() {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, OPTIONS",
       "Access-Control-Allow-Headers": "*",
+      "Cache-Control": "no-store",
     },
   });
 }
