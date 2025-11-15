@@ -139,7 +139,7 @@ export default function DashboardClient({
               <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-2xl font-bold"> 
                 {orders.filter((o) => o.status === "CONFIRMED").length} 
               </div>
             </CardContent>
